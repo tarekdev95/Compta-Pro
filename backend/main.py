@@ -1,73 +1,76 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy import create_engine
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
+from fastapi import FastAPI
+import uvicorn
 
-from db import SQLALCHEMY_DATABASE_URL, get_db
+# Import de la configuration DB
+from db import get_db
 
-app = FastAPI()
+# Import des routers individuels depuis chaque fichier
+from users.get_users import router as get_users_router
+from users.get_user import router as get_user_router
+from users.create_user import router as create_user_router
+from users.update_user import router as update_user_router
+from users.delete_user import router as delete_user_router
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-Base = automap_base()
-Base.prepare(engine, reflect=True)
+from pme.get_pmes import router as get_pmes_router
+from pme.get_pme import router as get_pme_router
+from pme.create_pme import router as create_pme_router
+from pme.update_pme import router as update_pme_router
+from pme.delete_pme import router as delete_pme_router
 
-TABLES = {
-    "bilan": getattr(Base.classes, "bilan", None),
-    "depense": getattr(Base.classes, "depense", None),
-    "entree": getattr(Base.classes, "entree", None),
-    "pme": getattr(Base.classes, "pme", None),
-    "user": getattr(Base.classes, "user", None),
-}
+from depenses.get_depenses import router as get_depenses_router
+from depenses.get_depense import router as get_depense_router
+from depenses.create_depense import router as create_depense_router
+from depenses.update_depense import router as update_depense_router
+from depenses.delete_depense import router as delete_depense_router
 
-def row_to_dict(row):
-    return {c.name: getattr(row, c.name) for c in row.__table__.columns}
+from entrees.get_entrees import router as get_entrees_router
+from entrees.get_entree import router as get_entree_router
+from entrees.create_entree import router as create_entree_router
+from entrees.update_entree import router as update_entree_router
+from entrees.delete_entree import router as delete_entree_router
+
+from bilan.get_bilans import router as get_bilans_router
+from bilan.get_bilan import router as get_bilan_router
+from bilan.create_bilan import router as create_bilan_router
+from bilan.update_bilan import router as update_bilan_router
+from bilan.delete_bilan import router as delete_bilan_router
+
+app = FastAPI(title="ComptaPro API - Architecture Ultra-Modulaire")
+
+# Inclusion de tous les routers individuels
+app.include_router(get_users_router)
+app.include_router(get_user_router)
+app.include_router(create_user_router)
+app.include_router(update_user_router)
+app.include_router(delete_user_router)
+
+app.include_router(get_pmes_router)
+app.include_router(get_pme_router)
+app.include_router(create_pme_router)
+app.include_router(update_pme_router)
+app.include_router(delete_pme_router)
+
+app.include_router(get_depenses_router)
+app.include_router(get_depense_router)
+app.include_router(create_depense_router)
+app.include_router(update_depense_router)
+app.include_router(delete_depense_router)
+
+app.include_router(get_entrees_router)
+app.include_router(get_entree_router)
+app.include_router(create_entree_router)
+app.include_router(update_entree_router)
+app.include_router(delete_entree_router)
+
+app.include_router(get_bilans_router)
+app.include_router(get_bilan_router)
+app.include_router(create_bilan_router)
+app.include_router(update_bilan_router)
+app.include_router(delete_bilan_router)
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-@app.get("/bilan", response_model=None)
-def get_bilan(db: Session = Depends(get_db)):
-    model = TABLES.get("bilan")
-    if model is None:
-        return {"error": "Table not found"}
-    return [row_to_dict(r) for r in db.query(model).all()]
-
-@app.get("/depense", response_model=None)
-def get_depense(db: Session = Depends(get_db)):
-    model = TABLES.get("depense")
-    if model is None:
-        return {"error": "Table not found"}
-    return [row_to_dict(r) for r in db.query(model).all()]
-
-@app.get("/entree", response_model=None)
-def get_entree(db: Session = Depends(get_db)):
-    model = TABLES.get("entree")
-    if model is None:
-        return {"error": "Table not found"}
-    return [row_to_dict(r) for r in db.query(model).all()]
-
-@app.get("/pme", response_model=None)
-def get_pme(db: Session = Depends(get_db)):
-    model = TABLES.get("pme")
-    if model is None:
-        return {"error": "Table not found"}
-    return [row_to_dict(r) for r in db.query(model).all()]
-
-@app.get("/user", response_model=None)
-def get_user(db: Session = Depends(get_db)):
-    model = TABLES.get("user")
-    if model is None:
-        return {"error": "Table not found"}
-    return [row_to_dict(r) for r in db.query(model).all()]
-
-@app.post("/user", response_model=None)
-def create_user(name: str, email: str, db: Session = Depends(get_db)):
-    model = TABLES.get("user")
-    if model is None:
-        return {"error": "Table not found"}
-    new_user = model(name=name, email=email)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return row_to_dict(new_user)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8003)
