@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 # Import de la configuration DB
 from db import get_db
@@ -10,6 +11,7 @@ from users.get_user import router as get_user_router
 from users.create_user import router as create_user_router
 from users.update_user import router as update_user_router
 from users.delete_user import router as delete_user_router
+from users.auth import router as auth_router
 
 from pme.get_pmes import router as get_pmes_router
 from pme.get_pme import router as get_pme_router
@@ -37,12 +39,22 @@ from bilan.delete_bilan import router as delete_bilan_router
 
 app = FastAPI(title="ComptaPro API - Architecture Ultra-Modulaire")
 
+# Configuration CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # URL du frontend Vite
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Inclusion de tous les routers individuels
 app.include_router(get_users_router)
 app.include_router(get_user_router)
 app.include_router(create_user_router)
 app.include_router(update_user_router)
 app.include_router(delete_user_router)
+app.include_router(auth_router)
 
 app.include_router(get_pmes_router)
 app.include_router(get_pme_router)
@@ -73,8 +85,4 @@ def health():
     return {"status": "ok"}
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     uvicorn.run(app, host="127.0.0.1", port=8003)
-=======
-    uvicorn.run(app, host="127.0.0.1", port=8003)
->>>>>>> 9854a7acdb0338f7a1d41ad0b44de94448e9a9f7

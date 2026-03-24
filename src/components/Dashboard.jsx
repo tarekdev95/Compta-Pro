@@ -1,49 +1,130 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { userService, pmeService, depenseService, entreeService } from '../services';
 
 const Dashboard = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [tasksToday, setTasksToday] = useState(0);
+  const [pmes, setPmes] = useState([]);
+  const [depenses, setDepenses] = useState([]);
+  const [entrees, setEntrees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Récupérer l'utilisateur connecté depuis localStorage
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      const userData = JSON.parse(user);
-      // Vérifier que c'est un comptable
-      if (userData.role === 'comptable') {
-        setCurrentUser(userData);
-        setTasksToday(Math.floor(Math.random() * 10) + 1);
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      // Récupérer l'utilisateur connecté depuis localStorage
+      const user = localStorage.getItem('currentUser');
+      if (user) {
+        const userData = JSON.parse(user);
+        // Vérifier que c'est un comptable
+        if (userData.role === 'comptable') {
+          setCurrentUser(userData);
+          setTasksToday(Math.floor(Math.random() * 10) + 1);
+
+          // Charger les données depuis l'API
+          await loadPMEs();
+          await loadDepenses();
+          await loadEntrees();
+        } else {
+          // Rediriger vers le dashboard des entreprises
+          navigate('/business-dashboard');
+        }
       } else {
-        // Rediriger vers le dashboard des entreprises
-        navigate('/business-dashboard');
+        navigate('/');
       }
-    } else {
-      navigate('/');
+    } catch (err) {
+      setError('Erreur lors du chargement des données');
+      console.error('Erreur:', err);
+    } finally {
+      setLoading(false);
     }
-  }, [navigate]);
+  };
 
-  // Mock data - replace with actual data from API/backend
-  const pendingInvoices = [
-    { id: 1, client: 'Client A', amount: 1500, dueDate: '2023-12-01' },
-    { id: 2, client: 'Client B', amount: 2500, dueDate: '2023-12-05' },
-    { id: 3, client: 'Client C', amount: 800, dueDate: '2023-12-10' },
-  ];
+  const loadPMEs = async () => {
+    try {
+      const response = await pmeService.getPMEs();
+      if (response.success) {
+        setPmes(response.data || []);
+      }
+    } catch (err) {
+      console.error('Erreur lors du chargement des PME:', err);
+    }
+  };
 
-  const expenses = 5000; // Total expenses
-  const revenues = 12000; // Total revenues
-  const netProfit = revenues - expenses; // Net profit
+  const loadDepenses = async () => {
+    try {
+      const response = await depenseService.getDepenses();
+      if (response.success) {
+        setDepenses(response.data || []);
+      }
+    } catch (err) {
+      console.error('Erreur lors du chargement des dépenses:', err);
+    }
+  };
+
+  const loadEntrees = async () => {
+    try {
+      const response = await entreeService.getEntrees();
+      if (response.success) {
+        setEntrees(response.data || []);
+      }
+    } catch (err) {
+      console.error('Erreur lors du chargement des entrées:', err);
+    }
+  };
+
+  // Calculs basés sur les données réelles
+  const totalDepenses = depenses.reduce((sum, depense) => sum + parseFloat(depense.montant_depense || 0), 0);
+  const totalEntrees = entrees.reduce((sum, entree) => sum + parseFloat(entree.montant_entree || 0), 0);
+  const netProfit = totalEntrees - totalDepenses;
+
+  // Données pour les graphiques et listes
+  const pendingInvoices = pmes.slice(0, 3).map((pme, index) => ({
+    id: pme.pme_id,
+    client: pme.nom,
+    amount: Math.floor(Math.random() * 5000) + 500,
+    dueDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  }));
 
   const recentTransactions = [
-    { id: 1, description: 'Vente produit X', amount: 2000, type: 'revenue', date: '2023-11-20' },
-    { id: 2, description: 'Achat fournitures', amount: -500, type: 'expense', date: '2023-11-19' },
-    { id: 3, description: 'Paiement facture', amount: -1500, type: 'expense', date: '2023-11-18' },
-    { id: 4, description: 'Service client Y', amount: 3000, type: 'revenue', date: '2023-11-17' },
-  ];
+    ...entrees.slice(0, 2).map(entree => ({
+      id: `entree-${entree.entree_id}`,
+      description: entree.description_entree,
+      amount: parseFloat(entree.montant_entree || 0),
+      type: 'revenue',
+      date: entree.date ? new Date(entree.date).toISOString().split('T')[0] : 'N/A'
+    })),
+    ...depenses.slice(0, 2).map(depense => ({
+      id: `depense-${depense.depense_id}`,
+      description: depense.description_depense,
+      amount: -parseFloat(depense.montant_depense || 0),
+      type: 'expense',
+      date: '2023-11-19' // Date fictive pour l'exemple
+    }))
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+      {loading && (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Chargement des données...</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && (
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-center mb-4">Tableau de Bord</h1>
         {currentUser && (
