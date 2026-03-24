@@ -11,11 +11,13 @@ function Login() {
     // gestion simple de la connexion (à remplacer par une vraie authentification avec backend)
     if (email && password) {
       // la vraie authentification devrait se faire avec un backend
-      navigate('/home');
+      navigate('/dashboard');
     }
   };
 
   return (
+
+    
 
 
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -29,7 +31,7 @@ function Login() {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="form-label">Email</label>
+              <label className="form-label">Adresse email</label>
               <div className="relative">
                 <input
                   type="email"
