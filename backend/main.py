@@ -73,4 +73,8 @@ def health():
     return {"status": "ok"}
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     uvicorn.run(app, host="127.0.0.1", port=8003)
+=======
+    uvicorn.run(app, host="0.0.0.0", port=8003)
+>>>>>>> 1516a7ba73ea0cdfbf1cf6f587e0ba59b57f3eff
