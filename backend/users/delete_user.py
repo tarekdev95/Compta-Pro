@@ -15,7 +15,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 def row_to_dict(row):
     return {c.name: getattr(row, c.name) for c in row.__table__.columns}
 
-@router.delete("/{user_id}")
+@router.delete("/delete_user/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     if not User:
         raise HTTPException(status_code=404, detail="Table user not found")

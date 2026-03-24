@@ -15,7 +15,7 @@ router = APIRouter(prefix="/pme", tags=["pme"])
 def row_to_dict(row):
     return {c.name: getattr(row, c.name) for c in row.__table__.columns}
 
-@router.delete("/{pme_id}")
+@router.delete("/delete_pme/{pme_id}")
 def delete_pme(pme_id: int, db: Session = Depends(get_db)):
     if not Pme:
         raise HTTPException(status_code=404, detail="Table pme not found")
