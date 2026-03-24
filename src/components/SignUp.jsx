@@ -5,14 +5,28 @@ function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('entreprise'); // 'entreprise' ou 'comptable'
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simple mock registration
     if (name && email && password) {
-      // In a real app, register with backend
-      navigate('/');
+      // Sauvegarder les informations utilisateur dans localStorage
+      const userData = {
+        name,
+        email,
+        role,
+        id: Date.now() // ID simple pour la simulation
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+      
+      // Rediriger vers le dashboard approprié
+      if (role === 'comptable') {
+        navigate('/accountant-dashboard');
+      } else {
+        navigate('/business-dashboard');
+      }
     }
   };
 
@@ -28,13 +42,15 @@ function SignUp() {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="form-label">Nom de l'entreprise</label>
+              <label className="form-label">
+                {role === 'comptable' ? 'Nom du comptable' : 'Nom de l\'entreprise'}
+              </label>
               <div className="relative">
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Votre nom d'entreprise"
+                  placeholder={role === 'comptable' ? 'Votre nom complet' : 'Votre nom d\'entreprise'}
                   required
                   className="form-input pl-10"
                 />
@@ -59,6 +75,25 @@ function SignUp() {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="form-label">Type de compte</label>
+              <div className="relative">
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="form-input pl-10"
+                  required
+                >
+                  <option value="entreprise">Entreprise</option>
+                  <option value="comptable">Comptable</option>
+                </select>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               </div>

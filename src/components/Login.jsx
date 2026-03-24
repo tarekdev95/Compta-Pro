@@ -4,14 +4,48 @@ import { Link, useNavigate } from 'react-router-dom';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('entreprise'); // 'entreprise' ou 'comptable'
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // gestion simple de la connexion (à remplacer par une vraie authentification avec backend)
     if (email && password) {
-      // la vraie authentification devrait se faire avec un backend
-      navigate('/dashboard');
+      // Récupérer les données utilisateur depuis localStorage (simulation)
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        // Vérifier si l'email correspond
+        if (userData.email === email) {
+          // Mettre à jour le rôle selon la sélection
+          userData.role = role;
+          // Sauvegarder l'utilisateur connecté
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+          // Rediriger selon le rôle
+          if (userData.role === 'comptable') {
+            navigate('/dashboard');
+          } else {
+            navigate('/business-dashboard');
+          }
+          return;
+        }
+      }
+      
+      // Si pas d'utilisateur trouvé, créer un utilisateur de test
+      const testUser = {
+        name: 'Utilisateur Test',
+        email: email,
+        role: role,
+        id: Date.now()
+      };
+      localStorage.setItem('user', JSON.stringify(testUser));
+      localStorage.setItem('currentUser', JSON.stringify(testUser));
+      
+      if (role === 'comptable') {
+        navigate('/dashboard');
+      } else {
+        navigate('/business-dashboard');
+      }
     }
   };
 
@@ -30,6 +64,25 @@ function Login() {
           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Connexion</h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="form-label">Type de compte</label>
+              <div className="relative">
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="form-input pl-10"
+                  required
+                >
+                  <option value="entreprise">Entreprise</option>
+                  <option value="comptable">Comptable</option>
+                </select>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
             <div>
               <label className="form-label">Adresse email</label>
               <div className="relative">
