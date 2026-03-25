@@ -1,51 +1,47 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { userService } from '../services';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('entreprise'); // 'entreprise' ou 'comptable'
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // gestion simple de la connexion (à remplacer par une vraie authentification avec backend)
-    if (email && password) {
-      // Récupérer les données utilisateur depuis localStorage (simulation)
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        // Vérifier si l'email correspond
-        if (userData.email === email) {
-          // Mettre à jour le rôle selon la sélection
-          userData.role = role;
-          // Sauvegarder l'utilisateur connecté
-          localStorage.setItem('currentUser', JSON.stringify(userData));
-          // Rediriger selon le rôle
-          if (userData.role === 'comptable') {
-            navigate('/dashboard');
-          } else {
-            navigate('/business-dashboard');
-          }
-          return;
+    setLoading(true);
+    setError('');
+
+    try {
+      // Pour l'instant, on utilise une connexion basique
+      // TODO: Implémenter une vraie authentification avec le backend
+      if (email && password) {
+        // Simulation d'une connexion réussie
+        const userData = {
+          name: 'Utilisateur Test',
+          email: email,
+          role: role,
+          id: Date.now()
+        };
+
+        // Sauvegarder l'utilisateur connecté
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+
+        // Rediriger selon le rôle
+        if (userData.role === 'comptable') {
+          navigate('/dashboard');
+        } else {
+          navigate('/business-dashboard');
         }
       }
-      
-      // Si pas d'utilisateur trouvé, créer un utilisateur de test
-      const testUser = {
-        name: 'Utilisateur Test',
-        email: email,
-        role: role,
-        id: Date.now()
-      };
-      localStorage.setItem('user', JSON.stringify(testUser));
-      localStorage.setItem('currentUser', JSON.stringify(testUser));
-      
-      if (role === 'comptable') {
-        navigate('/dashboard');
-      } else {
-        navigate('/business-dashboard');
-      }
+    } catch (err) {
+      setError('Erreur de connexion. Vérifiez vos identifiants.');
+      console.error('Erreur de connexion:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,9 +116,15 @@ function Login() {
               </div>
             </div>
 
-            <button type="submit" className="btn-primary w-full mt-6">
-              Se connecter
+            <button type="submit" className="btn-primary w-full mt-6" disabled={loading}>
+              {loading ? 'Connexion en cours...' : 'Se connecter'}
             </button>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+            )}
           </form>
           
           <div className="mt-6 text-center">
