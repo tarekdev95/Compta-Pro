@@ -1,26 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { bilanServices } from "../services/bilanService";
+import { depenseServices} from "../services/depenseService";
+
 
 const BusinessDashboard = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Récupérer l'utilisateur connecté
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      const userData = JSON.parse(user);
-      // Vérifier que c'est une entreprise
-      if (userData.role === 'entreprise') {
-        setCurrentUser(userData);
-      } else {
-        // Rediriger vers le dashboard des comptables
-        navigate('/accountant-dashboard');
-      }
+ useEffect(() => {
+  const user = localStorage.getItem('currentUser');
+
+  if (user) {
+    const userData = JSON.parse(user);
+
+    if (userData.role === 'entreprise') {
+      setCurrentUser(userData);
+
+      // 🔥 APPELS API ICI
+      fetchDashboardData();
+
     } else {
-      navigate('/');
+      navigate('/accountant-dashboard');
     }
-  }, [navigate]);
+  } else {
+    navigate('/');
+  }
+}, [navigate]);
+
+
+const fetchDashboardData = async () => {
+  try {
+    // exemple (à adapter selon ton backend)
+    const depensesRes = await depenseServices.getAll();
+    const bilanRes = await bilanServices.getBilan();
+
+    setExpenses(depensesRes.data.totalDepenses);
+    setRevenues(bilanRes.data.totalRevenus);
+    setPendingInvoices(bilanRes.data.facturesEnAttente);
+    setRecentTransactions(bilanRes.data.transactions);
+
+  } catch (error) {
+    console.error("Erreur API:", error);
+  }
+};
 
   // Mock data
   const pendingInvoices = [
@@ -29,8 +52,9 @@ const BusinessDashboard = () => {
     { id: 3, client: 'Client C', amount: 800, dueDate: '2026-04-10' },
   ];
 
-  const expenses = 5000;
-  const revenues = 12000;
+  const [expenses, setExpenses] = useState(0);
+  const [revenues, setRevenues] = useState(0);
+
   const netProfit = revenues - expenses;
 
   const recentTransactions = [
