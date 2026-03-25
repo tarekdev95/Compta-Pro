@@ -1,6 +1,6 @@
 # Compta-Pro - Application Comptable
 
-Une application web moderne de gestion comptable avec frontend React et backend FastAPI pour les cabinets comptables gérant les dossiers des PME.
+git Une application web moderne de gestion comptable avec frontend React et backend FastAPI pour les cabinets comptables gérant les dossiers des PME.
 
 ## 🚀 Démarrage Rapide
 
