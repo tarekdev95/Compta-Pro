@@ -59,11 +59,10 @@ const Dashboard = () => {
 
   const loadDepenses = async () => {
     try {
-      const response = await depenseService.getDepenses();
-      if (response.success) {
-        setDepenses(response.data || []);
+     const response = await depenseService.getDepenses();
+      setDepenses(response.data?.data || []);
       }
-    } catch (err) {
+      catch (err) {
       console.error('Erreur lors du chargement des dépenses:', err);
     }
   };
@@ -124,22 +123,36 @@ const Dashboard = () => {
         </div>
       )}
 
-      {!loading && !error && (
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-center mb-4">Tableau de Bord</h1>
-        {currentUser && (
-          <div className="text-center">
-            <p className="text-lg text-gray-600">
-              Bienvenue, <span className="font-semibold text-blue-600">{currentUser.name}</span>
-              {currentUser.role === 'comptable' && (
-                <span className="block mt-2 text-sm">
-                  Vous avez <span className="font-bold text-orange-600">{tasksToday} tâches</span> à effectuer aujourd'hui
-                </span>
-              )}
-            </p>
-          </div>
-        )}
-      </div>
+     {!loading && !error && (
+  <>
+    <div className="mb-8">
+      <h1 className="text-3xl font-bold text-center mb-4">
+        Tableau de Bord
+      </h1>
+
+      {currentUser && (
+        <div className="text-center">
+          <p className="text-lg text-gray-600">
+            Bienvenue,{" "}
+            <span className="font-semibold text-blue-600">
+              {currentUser.name}
+            </span>
+
+            {currentUser.role === "comptable" && (
+              <span className="block mt-2 text-sm">
+                Vous avez{" "}
+                <span className="font-bold text-orange-600">
+                  {tasksToday} tâches
+                </span>{" "}
+                à effectuer aujourd'hui
+              </span>
+            )}
+          </p>
+        </div>
+      )}
+    </div>
+  </>
+)}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -170,11 +183,11 @@ const Dashboard = () => {
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-2">Dépenses</h2>
-              <p className="text-2xl font-bold text-red-600">{expenses} €</p>
+              <p className="text-2xl font-bold text-red-600">{totalDepenses} €</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-2">Revenus</h2>
-              <p className="text-2xl font-bold text-green-600">{revenues} €</p>
+              <p className="text-2xl font-bold text-red-600">{totalDepenses} €</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-2">Bénéfice Net</h2>
@@ -259,7 +272,7 @@ const Dashboard = () => {
                     <p className="font-medium">{transaction.description}</p>
                     <p className="text-sm text-gray-500">{transaction.date}</p>
                   </div>
-                  <p className={`font-bold ${transaction.type === 'revenue' ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`font-bold ${transaction.type === 'entree' ? 'text-green-600' : 'text-red-600'}`}>
                     {transaction.amount > 0 ? '+' : ''}{transaction.amount} €
                   </p>
                 </li>

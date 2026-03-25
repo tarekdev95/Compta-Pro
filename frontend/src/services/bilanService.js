@@ -1,4 +1,8 @@
-import api from './api';
+import api from "../api/api";
+
+export const bilanServices = {
+  getBilan: () => api.get("/bilan"),
+};
 
 // Service pour les bilans
 export const bilanService = {

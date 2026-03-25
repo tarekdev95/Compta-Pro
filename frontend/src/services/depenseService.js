@@ -1,5 +1,8 @@
-import api from './api';
+import api from "../api/api";
 
+export const depenseServices = {
+  getAll: () => api.get("/depenses"),
+};
 // Service pour les dépenses
 export const depenseService = {
   // Créer une dépense

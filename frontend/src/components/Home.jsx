@@ -38,9 +38,9 @@ function Home() {
             <h1 className="text-3xl font-bold text-blue-600">Compta-Pro</h1>
             <p className="text-gray-600 text-sm">Gestion Comptable Simplifiée</p>
           </div>
-          <nav className="flex items-center gap-4">
+            <nav className="flex items-center gap-4">
             <button className="px-4 py-2 text-gray-700 hover:text-gray-900">Profil</button>
-            <Link to="/" className="btn-primary text-sm">
+            <Link to="/" className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 text-sm">
               Déconnexion
             </Link>
           </nav>
